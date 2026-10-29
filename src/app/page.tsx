@@ -1,234 +1,471 @@
-const steps = [
-  {
-    id: 'requirements',
-    title: '요구사항 분석·계획',
-    summary: '무엇을 만들고, 어디까지 만들지 먼저 정합니다.',
-    tasks: [
-      '누가 사용하는 기능인지, 어떤 문제를 해결할지 설명합니다.',
-      '사용자가 화면에서 시작해 결과를 확인하는 흐름을 정합니다.',
-      '수정할 파일과 작업 순서, 완료 기준을 확인합니다.',
-      '여러 단계의 작업은 작성자를 확인하고, 승인 후 plans/에 계획을 기록합니다.',
-    ],
-    checkpoint:
-      '기능·범위·완료 기준이 분명하고, 계획 파일이 필요하면 작성자와 생성 범위를 확인했나요?',
-    prompt:
-      '[만들고 싶은 기능]의 요구사항과 계획 초안을 보여 주세요. 사용 흐름, DB 필요 여부, 변경 파일과 완료 기준을 설명하고, 계획 파일이 필요하면 plans/ 경로와 작성자 식별자를 확인해 주세요. 아직 파일은 생성하거나 수정하지 마세요.',
-  },
-  {
-    id: 'database',
-    title: 'DB 분석',
-    summary: '저장할 데이터와 기존 DB 구조를 확인합니다.',
-    tasks: [
-      '저장할 항목과 데이터 사이의 관계를 검토합니다.',
-      '기존 모델을 사용할 수 있는지, Prisma 수정이 필요한지 확인합니다.',
-      '기존 데이터에 미치는 영향과 실제 DB 변경 여부를 구분합니다.',
-    ],
-    checkpoint: '모델 파일 수정과 실제 DB 마이그레이션을 구분했나요?',
-    prompt:
-      '계획한 기능에 필요한 데이터와 기존 Prisma 모델을 분석해 주세요. 변경이 필요하면 이유, 수정안, 기존 데이터에 미치는 영향을 보여 주세요. 실제 DB 변경과 마이그레이션은 별도 승인 전 실행하지 마세요.',
-  },
-  {
-    id: 'server',
-    title: '서버 처리',
-    summary: '입력을 확인하고 데이터를 안전하게 처리합니다.',
-    tasks: [
-      '서버에서 입력값을 검증하고 사용자 권한을 확인합니다.',
-      '필요한 저장·조회·수정·삭제 처리를 구현합니다.',
-      '실패했을 때 화면에 전달할 결과와 오류 처리 방식을 정합니다.',
-    ],
-    checkpoint: '허용된 사용자만 필요한 데이터를 처리할 수 있나요?',
-    prompt:
-      '승인한 계획에 따라 서버 처리를 구현해 주세요. 입력 검증, 권한 확인, DB 처리와 오류 응답을 포함하고 기존 구조를 유지하세요. 승인 범위를 벗어나는 DB 변경이 필요하면 먼저 알려 주세요.',
-  },
-  {
-    id: 'interface',
-    title: '화면 구현',
-    summary: '서버 처리에 맞춰 사용하기 쉬운 화면을 만듭니다.',
-    tasks: [
-      '계획 단계에서 정한 화면 흐름과 입력 항목을 구현합니다.',
-      '처리 중·성공·오류·데이터 없음 상태를 보여 줍니다.',
-      '작은 화면, 키보드 사용과 중복 제출도 확인합니다.',
-    ],
-    checkpoint: '사용자가 다음 행동과 처리 결과를 쉽게 알 수 있나요?',
-    prompt:
-      '승인한 화면 흐름에 맞춰 서버 처리와 연결되는 화면을 구현해 주세요. 입력 폼, 로딩, 성공·오류와 데이터가 없는 상태를 포함하고 모바일에서도 확인해 주세요.',
-  },
-  {
-    id: 'verification',
-    title: '연결·권한·동작 검증',
-    summary: '화면부터 DB까지 기능이 이어지는지 확인합니다.',
-    tasks: [
-      '정상 입력, 잘못된 입력과 권한이 없는 경우를 확인합니다.',
-      '실제 데이터 처리는 승인된 대상과 확인용 데이터로 검증합니다.',
-      '타입·린트·서식·빌드를 확인하고 미검증 항목을 구분합니다.',
-    ],
-    checkpoint: '확인한 결과와 아직 확인하지 않은 범위가 구분되나요?',
-    prompt:
-      '승인된 범위에서 화면·서버·DB 연결과 권한을 검증해 주세요. 타입·린트·서식·빌드 결과, 정상·실패 동작, 미검증 항목을 구분해 알려 주세요. 실제 DB 쓰기와 배포는 별도 승인 범위를 확인하세요.',
-  },
-] as const;
+'use client';
 
-const guides = [
-  ['docs/SETUP.md', '설치·실행과 프로젝트 구조'],
-  ['docs/CODEX_GUIDE.md', '단계별 요청·승인·검증 방법'],
-  ['docs/CUSTOMIZE_PROJECT.md', '새 프로젝트로 바꿀 항목'],
-] as const;
+import { useState } from 'react';
 
-export default function Home() {
+export default function HomePage() {
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+
+  // 로그인 폼 입력값 상태
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  // 회원가입 폼 입력값 상태
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+
+  // 상태 안내 메시지
+  const [feedback, setFeedback] = useState<{
+    text: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  // 데모 계정 원클릭 자동 입력
+  const handleFillDemo = () => {
+    setLoginEmail('user@example.com');
+    setLoginPassword('1234');
+    setFeedback({
+      text: '데모 계정(user@example.com / 1234)이 입력되었습니다.',
+      type: 'info',
+    });
+  };
+
+  // 로그인 제출 핸들러
+  const handleLoginSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!loginEmail.trim() || !loginPassword.trim()) {
+      setFeedback({
+        text: '이메일과 비밀번호를 모두 입력해 주세요.',
+        type: 'error',
+      });
+      return;
+    }
+
+    // 데모 계정 검증 및 모의 성공 처리
+    if (loginEmail === 'user@example.com' && loginPassword === '1234') {
+      setFeedback({
+        text: '로그인 성공! 환영합니다, 홍길동님.',
+        type: 'success',
+      });
+    } else {
+      setFeedback({
+        text: `로그인 요청 전송: ${loginEmail} (실제 서버 API 연동 준비 완료)`,
+        type: 'success',
+      });
+    }
+  };
+
+  // 회원가입 제출 핸들러
+  const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+      setFeedback({
+        text: '이름, 이메일, 비밀번호를 모두 입력해 주세요.',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (regPassword.length < 4) {
+      setFeedback({
+        text: '비밀번호는 4자 이상 입력해 주세요.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setFeedback({
+      text: `회원가입 완료: ${regName} (${regEmail}) 계정이 등록되었습니다. 로그인 탭에서 로그인해 주세요.`,
+      type: 'success',
+    });
+  };
+
   return (
-    <main className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-      <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-20">
-        <header className="mb-10 sm:mb-14">
-          <p className="mb-5 text-sm font-semibold tracking-wide text-indigo-600 dark:text-indigo-400">
-            바이브 코딩 시작 안내
-          </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight tracking-tight break-keep sm:text-5xl">
-            원하는 기능을,
-            <br />한 단계씩 만들어 보세요.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 break-keep text-zinc-600 dark:text-zinc-400">
-            데이터 저장이 필요한 새 기능을 만들 때 참고하는 기본 흐름입니다.
-            먼저 계획을 확인하고, 승인한 범위에서 구현과 검증을 이어 가세요.
-          </p>
-          <p className="mt-3 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-            이 화면은 참고 안내입니다. 기능 개발이나 DB 변경을 자동으로 실행하지
-            않습니다.
-          </p>
-        </header>
-
-        <nav aria-label="개발 단계 바로가기" className="mb-8">
-          <ol className="flex flex-wrap gap-2">
-            {steps.map((step, index) => (
-              <li key={step.id}>
-                <a
-                  href={`#${step.id}`}
-                  className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium transition-colors hover:border-indigo-400 hover:text-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:text-indigo-300"
-                >
-                  <span className="text-zinc-400">0{index + 1}</span>
-                  {step.title}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-
-        <aside
-          aria-label="진행 전에 확인할 원칙"
-          className="mb-10 rounded-2xl border border-indigo-100 bg-indigo-50 px-5 py-5 text-sm leading-7 text-indigo-950 sm:px-6 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100"
-        >
-          <p className="font-semibold">필요한 단계만, 승인한 범위에서</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>
-              DB가 필요 없으면 모델 수정은 생략하고, 문구·스타일 수정은 관련
-              단계만 진행합니다.
-            </li>
-            <li>
-              화면 설계는 계획부터 함께 검토합니다. 기존 승인 범위에서는 계속
-              진행하며, 범위가 넓어질 때 확인합니다.
-            </li>
-            <li>
-              Prisma 스키마 수정, 실제 DB 마이그레이션, 데이터 쓰기와 배포는
-              각각 승인 범위를 확인합니다.
-            </li>
-          </ul>
-        </aside>
-
-        <ol className="space-y-6">
-          {steps.map((step, index) => (
-            <li key={step.id}>
-              <article
-                id={step.id}
-                aria-labelledby={`${step.id}-title`}
-                className="scroll-mt-6 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 dark:border-zinc-800 dark:bg-zinc-900"
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-900">
+      {/* 상단 네비게이션 헤더 */}
+      <header className="bg-slate-950/80 border-b border-slate-800 sticky top-0 z-30 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+              {/* 북마크/저널 아이콘 */}
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
               >
-                <div className="flex items-start gap-4">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100 font-mono text-sm font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                  >
-                    0{index + 1}
-                  </span>
-                  <div>
-                    <h2
-                      id={`${step.id}-title`}
-                      className="text-xl font-semibold tracking-tight sm:text-2xl"
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-slate-100 leading-none flex items-center gap-2">
+                Experience Journal
+                <span className="text-[10px] font-mono font-normal px-2 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">
+                  Next.js App
+                </span>
+              </h1>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                경험 기록 및 관리 서비스
+              </p>
+            </div>
+          </div>
+
+          <div className="text-xs text-slate-400">
+            인증 방식:{' '}
+            <span className="font-mono text-emerald-400">
+              Next.js + Tailwind
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* 중앙 메인 콘텐츠: 로그인 / 회원가입 카드 */}
+      <main className="flex-1 max-w-md w-full mx-auto px-4 py-12 flex flex-col justify-center">
+        <div className="bg-slate-950 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden">
+          {/* 로그인 / 회원가입 탭 헤더 */}
+          <div className="flex border-b border-slate-800 bg-slate-900/50">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('login');
+                setFeedback(null);
+              }}
+              className={`flex-1 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
+                activeTab === 'login'
+                  ? 'text-emerald-400 border-emerald-500'
+                  : 'text-slate-400 hover:text-slate-200 border-transparent'
+              }`}
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                />
+              </svg>
+              로그인
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('register');
+                setFeedback(null);
+              }}
+              className={`flex-1 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
+                activeTab === 'register'
+                  ? 'text-emerald-400 border-emerald-500'
+                  : 'text-slate-400 hover:text-slate-200 border-transparent'
+              }`}
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                />
+              </svg>
+              회원가입
+            </button>
+          </div>
+
+          {/* 데모 계정 배너 (로그인 탭일 때만 표시) */}
+          {activeTab === 'login' && (
+            <div className="p-3 bg-emerald-950/40 border-b border-emerald-800/40 text-emerald-300 text-xs flex justify-between items-center px-6">
+              <span>
+                💡 <strong>데모 계정:</strong> user@example.com / 1234
+              </span>
+              <button
+                type="button"
+                onClick={handleFillDemo}
+                className="underline hover:text-white font-medium transition cursor-pointer"
+              >
+                자동 입력
+              </button>
+            </div>
+          )}
+
+          {/* 피드백 알림 메시지 */}
+          {feedback && (
+            <div
+              role="alert"
+              className={`mx-6 mt-4 p-3 rounded-lg text-xs flex items-center gap-2 ${
+                feedback.type === 'success'
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : feedback.type === 'info'
+                    ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+              }`}
+            >
+              <svg
+                className="w-4 h-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{feedback.text}</span>
+            </div>
+          )}
+
+          {/* 로그인 폼 */}
+          {activeTab === 'login' ? (
+            <form onSubmit={handleLoginSubmit} className="p-6 space-y-4">
+              <div className="text-center mb-4">
+                <h2 className="text-lg font-bold text-slate-100">
+                  계정에 로그인
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  등록된 이메일과 비밀번호를 입력해주세요.
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="login-email"
+                  className="block text-xs font-medium text-slate-300 mb-1.5"
+                >
+                  이메일 주소
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
-                      {step.title}
-                    </h2>
-                    <p className="mt-2 text-sm leading-7 text-zinc-600 dark:text-zinc-400">
-                      {step.summary}
-                    </p>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
                   </div>
-                </div>
-
-                <div className="mt-6 grid gap-6 md:grid-cols-[1.2fr_1fr]">
-                  <div>
-                    <h3 className="text-sm font-semibold">이 단계에서 할 일</h3>
-                    <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-zinc-600 dark:text-zinc-400">
-                      {step.tasks.map((task) => (
-                        <li key={task}>{task}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="rounded-xl bg-zinc-50 p-5 dark:bg-zinc-950">
-                    <h3 className="text-sm font-semibold">다음 단계 전 확인</h3>
-                    <p className="mt-3 text-sm leading-7 break-keep text-zinc-600 dark:text-zinc-400">
-                      {step.checkpoint}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 border-t border-zinc-100 pt-5 dark:border-zinc-800">
-                  <label
-                    htmlFor={`${step.id}-prompt`}
-                    className="text-sm font-semibold"
-                  >
-                    Codex에 이렇게 요청하세요
-                  </label>
-                  <p
-                    id={`${step.id}-help`}
-                    className="mt-1 text-xs leading-6 text-zinc-500 dark:text-zinc-400"
-                  >
-                    문장을 선택해 복사한 뒤, 내 기능과 승인 범위에 맞게 바꿔
-                    요청하세요.
-                  </p>
-                  <textarea
-                    id={`${step.id}-prompt`}
-                    aria-describedby={`${step.id}-help`}
-                    readOnly
-                    value={step.prompt}
-                    rows={4}
-                    className="mt-3 block min-h-32 w-full resize-y rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-7 text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-slate-200"
+                    placeholder="user@example.com"
                   />
                 </div>
-              </article>
-            </li>
-          ))}
-        </ol>
+              </div>
 
-        <footer className="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold">더 자세한 안내가 필요하다면</h2>
-          <p className="mt-2 text-sm leading-7 text-zinc-600 dark:text-zinc-400">
-            편집기에서 아래 문서를 열어 보세요. 실제 서비스 제작 시 이 안내
-            화면은 원하는 첫 화면으로 교체하면 됩니다.
-          </p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
-            {guides.map(([file, description]) => (
-              <li
-                key={file}
-                className="min-w-0 rounded-xl bg-white p-4 dark:bg-zinc-900"
+              <div>
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-medium text-slate-300 mb-1.5"
+                >
+                  비밀번호
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="login-password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-slate-200"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg shadow-lg shadow-emerald-600/20 transition flex justify-center items-center gap-2 mt-2 cursor-pointer"
               >
-                <p className="font-mono text-xs break-all text-indigo-600 dark:text-indigo-400">
-                  {file}
+                <span>로그인하기</span>
+              </button>
+            </form>
+          ) : (
+            /* 회원가입 폼 */
+            <form onSubmit={handleRegisterSubmit} className="p-6 space-y-4">
+              <div className="text-center mb-4">
+                <h2 className="text-lg font-bold text-slate-100">
+                  새 회원가입
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  경험을 기록할 새 계정을 생성합니다.
                 </p>
-                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  {description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </footer>
-      </div>
-    </main>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="reg-name"
+                  className="block text-xs font-medium text-slate-300 mb-1.5"
+                >
+                  이름
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="reg-name"
+                    type="text"
+                    required
+                    autoComplete="name"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-slate-200"
+                    placeholder="홍길동"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="reg-email"
+                  className="block text-xs font-medium text-slate-300 mb-1.5"
+                >
+                  이메일 주소
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="reg-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-slate-200"
+                    placeholder="user@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="reg-password"
+                  className="block text-xs font-medium text-slate-300 mb-1.5"
+                >
+                  비밀번호
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="reg-password"
+                    type="password"
+                    required
+                    minLength={4}
+                    autoComplete="new-password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-slate-200"
+                    placeholder="비밀번호 입력 (4자 이상)"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg shadow-lg shadow-emerald-600/20 transition flex justify-center items-center gap-2 mt-2 cursor-pointer"
+              >
+                <span>회원가입 완료</span>
+              </button>
+            </form>
+          )}
+        </div>
+      </main>
+
+      {/* 하단 푸터 */}
+      <footer className="py-6 text-center text-xs text-slate-500 border-t border-slate-800">
+        &copy; Experience Journal Web Application
+      </footer>
+    </div>
   );
 }
