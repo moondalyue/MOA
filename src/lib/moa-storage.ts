@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   dataSchema,
   emptyData,
+  episodeDraftSchema,
   type MoaData,
   type Evidence,
 } from './moa-types';
@@ -72,6 +73,39 @@ export async function loadData() {
     req.onsuccess = () => set(req.result);
   });
   return raw === undefined ? emptyData : dataSchema.parse(raw);
+}
+const draftSchema = z.object({
+  values: episodeDraftSchema,
+  files: z.array(
+    z.object({
+      name: z.string(),
+      type: z.string(),
+      description: z.string().max(10000),
+      blob: z.instanceof(Blob),
+    }),
+  ),
+  removed: z.array(z.string()),
+  savedAt: z.string(),
+  baseUpdatedAt: z.string().optional(),
+});
+export type EpisodeDraft = z.infer<typeof draftSchema>;
+export async function loadEpisodeDraft(key: string) {
+  const raw = await transact<unknown>(['records'], 'readonly', (tx, set) => {
+    const req = tx.objectStore('records').get(`draft:${key}`);
+    req.onsuccess = () => set(req.result);
+  });
+  return raw === undefined ? null : draftSchema.parse(raw);
+}
+export async function saveEpisodeDraft(key: string, draft: EpisodeDraft) {
+  const valid = draftSchema.parse(draft);
+  await transact<void>(['records'], 'readwrite', (tx) => {
+    tx.objectStore('records').put(valid, `draft:${key}`);
+  });
+}
+export async function clearEpisodeDraft(key: string) {
+  await transact<void>(['records'], 'readwrite', (tx) => {
+    tx.objectStore('records').delete(`draft:${key}`);
+  });
 }
 export async function allEvidence() {
   return transact<Evidence[]>(['evidence'], 'readonly', (tx, set) => {

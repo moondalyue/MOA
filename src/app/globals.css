@@ -2094,3 +2094,131 @@ input[type='checkbox'] {
 .episode-card .card-link h3 {
   margin: 16px 0 2px;
 }
+/* 기록 작성 지원 */
+.record-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.draft-status {
+  color: #6c5684;
+  font-size: 12px;
+  margin: -10px 0 18px;
+}
+.draft-conflict {
+  padding: 12px;
+  background: #fff7e7;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.star-input .writing-question {
+  display: block;
+  margin: 0 0 8px;
+  color: #73657d;
+  font-size: 12px;
+  font-weight: 400;
+}
+.record-ai > summary {
+  color: #755293;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.record-ai[open] > summary {
+  margin-bottom: 16px;
+}
+.record-ai .button-row {
+  margin: 18px 0;
+}
+.record-ai > small {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+}
+.ai-star-result {
+  padding: 18px;
+  background: #f6f2fb;
+  border: 1px solid #e6dcf1;
+  border-radius: 10px;
+  margin: 18px 0;
+}
+.ai-star-result h4 {
+  font-weight: 600;
+  margin: 12px 0;
+}
+.ai-star-result strong {
+  font-size: 12px;
+  color: #71578a;
+}
+.ai-star-result p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.ai-star-result ul {
+  list-style: disc;
+  padding-left: 20px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.record-tabs {
+  overflow-x: auto;
+}
+.record-tabs button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.record-tabs .record-export-button {
+  margin-left: auto;
+  font-size: 12px;
+  color: #765590;
+}
+.record-export {
+  padding: 22px 28px 0;
+}
+.record-export > p {
+  font-size: 13px;
+  color: #796888;
+  margin-bottom: 20px;
+}
+.record-export .section-line {
+  font-size: 13px;
+}
+.export-record-list {
+  max-height: 45dvh;
+  overflow-y: auto;
+  margin-top: 14px;
+}
+.export-record-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+  border-bottom: 1px solid #eeedf3;
+}
+.export-record-choice strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.export-record-choice small {
+  display: block;
+  color: #8f7c9e;
+  font-size: 11px;
+  margin-top: 4px;
+}
+@media (max-width: 600px) {
+  .record-tabs button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .record-export {
+    padding: 18px 20px 0;
+  }
+}

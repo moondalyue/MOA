@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,9 @@ import {
   type Evidence,
 } from '@/lib/moa-types';
 import { checkFile, download } from '@/lib/moa-storage';
+import { useEpisodeDraft } from './use-episode-draft';
+import { RecordAi } from './record-ai';
+import { writingQuestions } from '@/lib/moa-star';
 
 export function Modal({
   title,
@@ -258,13 +261,7 @@ export function EpisodeEditor({
       : linkedActivity?.category === '대외활동'
         ? '대외활동'
         : '기타');
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors, isDirty, isSubmitting },
-  } = useForm<Episode>({
+  const form = useForm<Episode>({
     resolver: zodResolver(episodeSchema),
     defaultValues: initial
       ? {
@@ -292,27 +289,49 @@ export function EpisodeEditor({
           updatedAt: new Date().toISOString(),
         },
   });
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = form;
   const [files, setFiles] = useState<{ file: File; description: string }[]>([]),
     [removed, setRemoved] = useState<string[]>([]),
     [error, setError] = useState('');
   const [preview, setPreview] = useState<{ url: string; name: string } | null>(
     null,
   );
+  const draft = useEpisodeDraft({
+    form,
+    draftKey: initial?.id || activityId || 'new',
+    baseUpdatedAt: initial?.updatedAt,
+    files,
+    removed,
+    restoreFiles: setFiles,
+    restoreRemoved: setRemoved,
+  });
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview.url);
     },
     [preview],
   );
+  const selectedType = useWatch({ control, name: 'activityType' }) || '기타';
+  const questions = writingQuestions[selectedType];
   const selectedTags = useWatch({ control, name: 'tags' }),
     selectedFeelings = useWatch({ control, name: 'feelings' });
-  const close = () => {
-    if (
-      !isSubmitting &&
-      (!(isDirty || files.length || removed.length) ||
-        confirm('저장하지 않고 닫을까요?'))
-    )
+  const close = async () => {
+    if (isSubmitting || !draft.ready) return;
+    try {
+      await draft.flush();
       onClose();
+    } catch {
+      setError(
+        '임시 저장하지 못했어요. 입력 내용을 정식 저장한 뒤 닫아 주세요.',
+      );
+    }
   };
   function toggle(field: 'tags' | 'feelings', value: string) {
     const values = field === 'tags' ? selectedTags : selectedFeelings;
@@ -345,12 +364,16 @@ export function EpisodeEditor({
                 blob: new Blob([item.file], { type }),
               });
             }
+            draft.pause(true);
             await onSave(
               { ...e, updatedAt: new Date().toISOString() },
               additions,
               removed,
             );
+            await draft.complete();
+            onClose();
           } catch (e) {
+            draft.pause(false);
             setError(e instanceof Error ? e.message : '저장 실패');
           }
         })}
@@ -358,225 +381,295 @@ export function EpisodeEditor({
         <p className="form-intro">
           완벽한 문장이 아니어도 괜찮아요. 기억나는 것부터 모아보세요.
         </p>
-        <div className="form-grid">
-          <Field label="경험 제목 *" error={errors.title?.message} wide>
-            <input
-              autoFocus
-              maxLength={150}
-              placeholder="이 경험을 한 문장으로 표현한다면?"
-              {...register('title')}
-            />
-          </Field>
-          <Field label="활동 종류 *" error={errors.activityType?.message} wide>
-            <select {...register('activityType')}>
-              {activityTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="시작일 *" error={errors.date?.message}>
-            <input required type="date" {...register('date')} />
-          </Field>
-          <Field label="종료일 *" error={errors.endDate?.message}>
-            <input required type="date" {...register('endDate')} />
-          </Field>
-        </div>
-        <section className="form-section">
-          <h3>이 경험에서 발휘한 역량</h3>
-          <div className="chips">
-            {skills.map((s) => (
-              <button
-                className={`chip ${selectedTags.includes(s) ? 'selected' : ''}`}
-                type="button"
-                aria-pressed={selectedTags.includes(s)}
-                key={s}
-                onClick={() => toggle('tags', s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </section>
-        <section className="form-section">
-          <div className="section-line">
-            <h3>STAR로 차근차근</h3>
-            <span className="muted">빈 항목은 나중에 채워도 괜찮아요</span>
-          </div>
-          {starFields.map(([key, letter, en, title, placeholder]) => (
-            <label className="star-field" key={key}>
-              <span className="star-letter">{letter}</span>
-              <span className="star-input">
-                <strong>
-                  {title} <small>{en}</small>
-                </strong>
-                <textarea
-                  rows={3}
-                  maxLength={10000}
-                  placeholder={placeholder}
-                  {...register(key)}
-                />
-              </span>
-            </label>
-          ))}
-        </section>
-        <section className="form-section">
-          <h3>경험의 온도, 회고 키워드</h3>
-          <p className="muted">
-            그때의 마음을 골라보세요. 여러 개 선택할 수 있어요.
-          </p>
-          <div className="chips">
-            {feelings.map((s) => (
-              <button
-                className={`chip ${selectedFeelings.includes(s) ? 'selected' : ''}`}
-                type="button"
-                aria-pressed={selectedFeelings.includes(s)}
-                key={s}
-                onClick={() => toggle('feelings', s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <div className="reflection-fields">
-            {(
-              [
-                ['regret', '조금 아쉬웠던 점'],
-                ['learned', '경험을 통해 배운 점'],
-                ['improve', '다시 한다면 보완할 점'],
-              ] as const
-            ).map(([key, label]) => (
-              <Field label={label} key={key}>
-                <textarea
-                  rows={2}
-                  maxLength={10000}
-                  {...register(key)}
-                  placeholder="한두 줄로 솔직하게 남겨보세요."
-                />
-              </Field>
-            ))}
-          </div>
-        </section>
-        <section className="form-section">
-          <h3>경험을 보여주는 증빙</h3>
-          <label className="upload-area">
-            <span>＋ 사진·파일 선택</span>
-            <small>
-              JPG · PNG · PDF / 파일당 최대 10MB · 브라우저 로컬 저장
-            </small>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,application/pdf"
-              multiple
-              disabled={isSubmitting}
-              onChange={async (e) => {
-                const input = e.currentTarget;
-                const picked = Array.from(input.files || []);
-                try {
-                  for (const f of picked) await checkFile(f);
-                  setFiles((prev) => [
-                    ...prev,
-                    ...picked.map((file) => ({ file, description: '' })),
-                  ]);
-                  setError('');
-                } catch (e) {
-                  setError(
-                    e instanceof Error ? e.message : '파일을 확인해 주세요.',
+        <p role="status" className="draft-status">
+          {draft.status}
+          <button
+            type="button"
+            className="text-button draft-clear"
+            disabled={!draft.ready || isSubmitting}
+            onClick={() => {
+              if (
+                confirm(
+                  '작성 중인 임시 저장을 지울까요? 정식 저장된 기록은 유지돼요.',
+                )
+              )
+                void draft
+                  .discard()
+                  .catch(() =>
+                    setError(
+                      '임시 저장을 지우지 못했어요. 다시 시도해 주세요.',
+                    ),
                   );
-                }
-                input.value = '';
-              }}
-            />
-          </label>
-          {evidence
-            .filter((f) => !removed.includes(f.id))
-            .map((f) => (
-              <div className="attachment" key={f.id}>
-                <div>
-                  <strong>{f.name}</strong>
-                  <small>{f.description || '설명 없음'}</small>
-                </div>
-                {f.type.startsWith('image/') && (
+            }}
+          >
+            임시 저장 지우기
+          </button>
+        </p>
+        {draft.conflict && (
+          <div className="draft-conflict">
+            <button
+              type="button"
+              className="text-button"
+              onClick={draft.restoreConflict}
+            >
+              임시 저장 내용 불러오기
+            </button>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() =>
+                void draft
+                  .dismissConflict()
+                  .catch(() =>
+                    setError('초안을 정리하지 못했어요. 다시 시도해 주세요.'),
+                  )
+              }
+            >
+              현재 기록으로 시작하기
+            </button>
+          </div>
+        )}
+        <fieldset
+          className="record-fields"
+          disabled={!draft.ready || !!draft.conflict || isSubmitting}
+        >
+          <div className="form-grid">
+            <Field label="경험 제목 *" error={errors.title?.message} wide>
+              <input
+                autoFocus
+                maxLength={150}
+                placeholder="이 경험을 한 문장으로 표현한다면?"
+                {...register('title')}
+              />
+            </Field>
+            <Field
+              label="활동 종류 *"
+              error={errors.activityType?.message}
+              wide
+            >
+              <select {...register('activityType')}>
+                {activityTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="시작일 *" error={errors.date?.message}>
+              <input required type="date" {...register('date')} />
+            </Field>
+            <Field label="종료일 *" error={errors.endDate?.message}>
+              <input required type="date" {...register('endDate')} />
+            </Field>
+          </div>
+          <section className="form-section">
+            <h3>이 경험에서 발휘한 역량</h3>
+            <div className="chips">
+              {skills.map((s) => (
+                <button
+                  className={`chip ${selectedTags.includes(s) ? 'selected' : ''}`}
+                  type="button"
+                  aria-pressed={selectedTags.includes(s)}
+                  key={s}
+                  onClick={() => toggle('tags', s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="form-section">
+            <div className="section-line">
+              <h3>STAR로 차근차근</h3>
+              <span className="muted">빈 항목은 나중에 채워도 괜찮아요</span>
+            </div>
+            {starFields.map(([key, letter, en, title, placeholder]) => (
+              <label className="star-field" key={key}>
+                <span className="star-letter">{letter}</span>
+                <span className="star-input">
+                  <strong>
+                    {title} <small>{en}</small>
+                  </strong>
+                  <small className="writing-question">{questions[key]}</small>
+                  <textarea
+                    rows={3}
+                    maxLength={10000}
+                    placeholder={questions[key] || placeholder}
+                    {...register(key)}
+                  />
+                </span>
+              </label>
+            ))}
+          </section>
+          <RecordAi
+            getValues={getValues}
+            onApply={(values) => {
+              for (const key of [
+                'situation',
+                'task',
+                'action',
+                'result',
+              ] as const)
+                setValue(key, values[key], { shouldDirty: true });
+            }}
+          />
+          <section className="form-section">
+            <h3>경험의 온도, 회고 키워드</h3>
+            <p className="muted">
+              그때의 마음을 골라보세요. 여러 개 선택할 수 있어요.
+            </p>
+            <div className="chips">
+              {feelings.map((s) => (
+                <button
+                  className={`chip ${selectedFeelings.includes(s) ? 'selected' : ''}`}
+                  type="button"
+                  aria-pressed={selectedFeelings.includes(s)}
+                  key={s}
+                  onClick={() => toggle('feelings', s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="reflection-fields">
+              {(
+                [
+                  ['regret', '조금 아쉬웠던 점'],
+                  ['learned', '경험을 통해 배운 점'],
+                  ['improve', '다시 한다면 보완할 점'],
+                ] as const
+              ).map(([key, label]) => (
+                <Field label={label} key={key}>
+                  <textarea
+                    rows={2}
+                    maxLength={10000}
+                    {...register(key)}
+                    placeholder="한두 줄로 솔직하게 남겨보세요."
+                  />
+                </Field>
+              ))}
+            </div>
+          </section>
+          <section className="form-section">
+            <h3>경험을 보여주는 증빙</h3>
+            <label className="upload-area">
+              <span>＋ 사진·파일 선택</span>
+              <small>
+                JPG · PNG · PDF / 파일당 최대 10MB · 브라우저 로컬 저장
+              </small>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,application/pdf"
+                multiple
+                disabled={isSubmitting}
+                onChange={async (e) => {
+                  const input = e.currentTarget;
+                  const picked = Array.from(input.files || []);
+                  try {
+                    for (const f of picked) await checkFile(f);
+                    setFiles((prev) => [
+                      ...prev,
+                      ...picked.map((file) => ({ file, description: '' })),
+                    ]);
+                    setError('');
+                  } catch (e) {
+                    setError(
+                      e instanceof Error ? e.message : '파일을 확인해 주세요.',
+                    );
+                  }
+                  input.value = '';
+                }}
+              />
+            </label>
+            {evidence
+              .filter((f) => !removed.includes(f.id))
+              .map((f) => (
+                <div className="attachment" key={f.id}>
+                  <div>
+                    <strong>{f.name}</strong>
+                    <small>{f.description || '설명 없음'}</small>
+                  </div>
+                  {f.type.startsWith('image/') && (
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() =>
+                        setPreview({
+                          url: URL.createObjectURL(f.blob),
+                          name: f.name,
+                        })
+                      }
+                    >
+                      미리보기
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="text-button"
-                    onClick={() =>
-                      setPreview({
-                        url: URL.createObjectURL(f.blob),
-                        name: f.name,
-                      })
-                    }
+                    onClick={() => download(f.blob, f.name)}
                   >
-                    미리보기
+                    다운로드
                   </button>
-                )}
+                  <button
+                    type="button"
+                    className="text-button danger"
+                    onClick={() => setRemoved([...removed, f.id])}
+                  >
+                    첨부 해제
+                  </button>
+                </div>
+              ))}
+            {preview && (
+              <figure className="evidence-preview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview.url} alt={preview.name} />
+                <figcaption>
+                  {preview.name}
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setPreview(null)}
+                  >
+                    닫기
+                  </button>
+                </figcaption>
+              </figure>
+            )}
+            {files.map((item, i) => (
+              <div className="attachment" key={i}>
+                <span>{item.file.name}</span>
+                <label>
+                  <span className="sr-only">자료 설명</span>
+                  <input
+                    maxLength={10000}
+                    placeholder="자료 설명"
+                    value={item.description}
+                    onChange={(e) =>
+                      setFiles(
+                        files.map((f, j) =>
+                          j === i ? { ...f, description: e.target.value } : f,
+                        ),
+                      )
+                    }
+                  />
+                </label>
                 <button
                   type="button"
                   className="text-button"
-                  onClick={() => download(f.blob, f.name)}
+                  onClick={() => setFiles(files.filter((_, j) => j !== i))}
                 >
-                  다운로드
-                </button>
-                <button
-                  type="button"
-                  className="text-button danger"
-                  onClick={() => setRemoved([...removed, f.id])}
-                >
-                  첨부 해제
+                  제외
                 </button>
               </div>
             ))}
-          {preview && (
-            <figure className="evidence-preview">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview.url} alt={preview.name} />
-              <figcaption>
-                {preview.name}
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={() => setPreview(null)}
-                >
-                  닫기
-                </button>
-              </figcaption>
-            </figure>
-          )}
-          {files.map((item, i) => (
-            <div className="attachment" key={i}>
-              <span>{item.file.name}</span>
-              <label>
-                <span className="sr-only">자료 설명</span>
-                <input
-                  maxLength={10000}
-                  placeholder="자료 설명"
-                  value={item.description}
-                  onChange={(e) =>
-                    setFiles(
-                      files.map((f, j) =>
-                        j === i ? { ...f, description: e.target.value } : f,
-                      ),
-                    )
-                  }
-                />
-              </label>
-              <button
-                type="button"
-                className="text-button"
-                onClick={() => setFiles(files.filter((_, j) => j !== i))}
-              >
-                제외
-              </button>
-            </div>
-          ))}
-        </section>
-        <label className="check-line">
-          <input type="checkbox" {...register('favorite')} /> ★ 중요한 경험으로
-          즐겨찾기
-        </label>
-        <ErrorMessage message={error} />
-        <Footer busy={isSubmitting} onClose={close} />
+          </section>
+          <label className="check-line">
+            <input type="checkbox" {...register('favorite')} /> ★ 중요한
+            경험으로 즐겨찾기
+          </label>
+          <ErrorMessage message={error} />
+        </fieldset>
+        <Footer busy={isSubmitting || !draft.ready} onClose={close} />
       </form>
     </Modal>
   );

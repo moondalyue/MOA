@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Empty, EpisodeCard, DeadlineList } from './cards';
 import { ActivityEditor, EpisodeEditor, DeadlineEditor } from './editors';
 import { DeadlineAlerts } from './deadline-alerts';
+import { RecordExport } from './record-export';
 import {
   allEvidence,
   exportBackup,
@@ -63,6 +64,7 @@ export default function MoaApp() {
   const [month, setMonth] = useState(''),
     [selectedDate, setSelectedDate] = useState('');
   const [starredDates, setStarredDates] = useState<string[]>([]);
+  const [exporting, setExporting] = useState(false);
   const [busy, setBusy] = useState(false);
   const backupInput = useRef<HTMLInputElement>(null),
     lock = useRef(false);
@@ -329,6 +331,13 @@ export default function MoaApp() {
                   {type}
                 </button>
               ))}
+              <button
+                type="button"
+                className="record-export-button"
+                onClick={() => setExporting(true)}
+              >
+                PDF 내보내기
+              </button>
             </nav>
           )}
           {view === 'home' && (
@@ -883,8 +892,14 @@ export default function MoaApp() {
               additions,
               removed,
             );
-            setEditor(null);
           }}
+        />
+      )}
+      {exporting && (
+        <RecordExport
+          records={recent}
+          activities={data.activities}
+          onClose={() => setExporting(false)}
         />
       )}
       {editor?.type === 'deadline' && (

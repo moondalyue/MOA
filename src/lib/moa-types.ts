@@ -93,6 +93,12 @@ export const dataSchema = z
   );
 export type Activity = z.infer<typeof activitySchema>;
 export type Episode = z.infer<typeof episodeSchema>;
+// 임시 저장은 아직 비어 있거나 정리 중인 입력도 복구할 수 있어야 한다.
+export const episodeDraftSchema = z.object(episodeSchema.shape).extend({
+  title: z.string().max(150),
+  date: z.string().max(10),
+  endDate: z.string().max(10).optional(),
+});
 export type Deadline = z.infer<typeof deadlineSchema>;
 export type MoaData = z.infer<typeof dataSchema>;
 export function recordType(e: Episode, activities: Activity[]) {
