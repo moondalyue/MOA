@@ -1,0 +1,50 @@
+.activity-calendar {
+  --fc-monarch-primary: #4338ca;
+  --fc-monarch-primary-over: #3730a3;
+  --fc-monarch-primary-down: #312e81;
+  --fc-monarch-background: #ffffff;
+  --fc-monarch-foreground: #18181b;
+  --fc-monarch-outline: #4f46e5;
+}
+
+.activity-calendar .calendar-day {
+  height: 7rem;
+  vertical-align: top;
+}
+.activity-calendar .calendar-day-selected {
+  background-color: #eef2ff;
+  box-shadow: inset 0 0 0 2px #6366f1;
+}
+.activity-calendar :focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  .activity-calendar {
+    font-size: 0.8rem;
+  }
+  .activity-calendar .calendar-day {
+    height: 6rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .activity-calendar {
+    color-scheme: dark;
+    --fc-monarch-background: #18181b;
+    --fc-monarch-foreground: #f4f4f5;
+    --fc-monarch-faint: #ffffff0d;
+    --fc-monarch-muted: #ffffff1a;
+    --fc-monarch-strong: #ffffff33;
+    --fc-monarch-stronger: #ffffff40;
+    --fc-monarch-strongest: #ffffff4d;
+    --fc-monarch-faint-foreground: #a1a1aa;
+    --fc-monarch-muted-foreground: #d4d4d8;
+    --fc-monarch-popover: #27272a;
+    --fc-monarch-outline: #a5b4fc;
+  }
+  .activity-calendar .calendar-day-selected {
+    background-color: #312e8155;
+  }
+}

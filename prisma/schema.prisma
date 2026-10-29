@@ -7,12 +7,74 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ActivityCategory {
+  SCHOOL
+  CHURCH
+  VOLUNTEER
+}
+
+enum ActivityVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+/// 앱 회원 정보. 비밀번호와 세션은 Supabase Auth에서 관리한다.
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  name      String?
+  id         String  @id @default(uuid()) @db.Uuid
+  /// Supabase auth.users.id와 연결한다. 기존 회원은 별도 확인 후 연결한다.
+  /// 이 필드만으로 auth 스키마 외래 키나 접근 권한이 생성되지는 않는다.
+  authUserId String? @unique @db.Uuid
+  /// Auth 이메일의 앱 사본. 로그인 사용자 정보로 동기화하며 주소 소유 확인을 뜻하지 않는다.
+  email      String  @unique
+  name       String?
+
+  /// 기존 회원 데이터 보존을 위해 선택값으로 추가한다.
+  nickname String? @db.VarChar(50)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  activities Activity[]
+
   @@map("users")
+}
+
+/// 회원이 작성한 교내·교회 활동 또는 봉사활동.
+model Activity {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @db.Uuid
+  category     ActivityCategory
+  title        String           @db.VarChar(100)
+  organization String           @db.VarChar(100)
+
+  /// 활동 기간은 시간대 변환이 필요 없는 날짜로 저장한다.
+  startDate DateTime @db.Date
+
+  /// 종료일이 없으면 현재 활동 중인 것으로 해석한다.
+  endDate DateTime? @db.Date
+
+  /// 교내·교회 활동에서 담당한 역할.
+  role String? @db.VarChar(100)
+
+  /// 봉사 시간. 단위는 시간이며 소수 둘째 자리까지 저장한다.
+  volunteerHours Decimal? @db.Decimal(8, 2)
+
+  /// 봉사활동 장소. 개인 주소 등 불필요한 개인정보는 저장하지 않는다.
+  location String? @db.VarChar(200)
+
+  description String  @db.VarChar(2000)
+  achievement String? @db.VarChar(2000)
+  learning    String  @db.VarChar(2000)
+
+  /// 기본값은 비공개이며 실제 공개 여부는 서버에서 검사한다.
+  visibility ActivityVisibility @default(PRIVATE)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  /// 활동이 있는 회원을 삭제할 때 활동이 자동 삭제되지 않도록 한다.
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt, id])
+  @@map("activities")
 }

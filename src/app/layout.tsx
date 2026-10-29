@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Navigation from './components/navigation';
 import './globals.css';
 
 const geistSans = Geist({
@@ -13,9 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '바이브 코딩 시작 안내',
-  description:
-    '요구사항 분석부터 DB·서버·화면 구현과 검증까지, 비개발자를 위한 개발 순서 안내',
+  title: '나의 활동 기록',
+  description: '교내·교회 활동과 봉사활동을 기록하고 나의 성장을 확인하세요.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
@@ -24,7 +24,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Navigation />
+        {children}
+      </body>
     </html>
   );
 }

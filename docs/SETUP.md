@@ -2,7 +2,7 @@
 
 새 프로젝트를 시작하기 위한 최소 보일러플레이트입니다. Next.js App Router, TypeScript, Tailwind CSS, Zod, React Hook Form, `@hookform/resolvers`, Prisma 7, ESLint, Prettier와 VS Code 설정을 포함합니다. Supabase는 PostgreSQL 데이터베이스로 사용합니다.
 
-CRUD·로그인 화면은 없으며 기본 `User` 모델만 포함합니다. Zod는 환경 변수 검증에 사용하며 React Hook Form과 resolvers는 필요한 폼을 만들 때 사용할 수 있도록 설치 구성에만 포함합니다. create-next-app 16.4.3의 TypeScript·Tailwind·ESLint·App Router 생성 결과를 기본으로 사용하고, Supabase 연결과 개발 편의를 위한 설정을 추가했습니다.
+현재 프로젝트에는 Supabase Auth 계정 화면과 회원별 포트폴리오 등록·목록·수정·삭제 코드가 포함되어 있습니다. `User`와 `Activity` 모델을 사용하며 실제 Supabase 프로젝트 연결과 DB 적용은 별도 준비가 필요합니다. Zod·React Hook Form으로 입력을 검사하고 서버에서도 재검사합니다. 초기 구성은 create-next-app 16.4.3을 기반으로 합니다. 인증 준비는 [Supabase Auth 연결](AUTHENTICATION.md#현재-프로젝트의-supabase-auth-연결)을 확인하세요.
 
 처음에는 **프로젝트 가져오기 → 화면 실행**까지만 진행하세요. DB·인증·폰트 선택은 필요한 기능을 만들 때 검토합니다. 실행 중 오류가 나면 [오류 확인 안내](TROUBLESHOOTING.md)를 참고하세요.
 
@@ -54,17 +54,17 @@ VS Code에서 추천 확장을 확인하면 ESLint, Prettier, Prisma를 선택�
 
 첫 화면이 열렸다면 [Codex 사용 안내](CODEX_GUIDE.md)를 참고해 만들 기능·사용자·완료 기준부터 정하세요. 아래 문서를 모두 읽거나 선택 사항을 전부 결정한 뒤 시작할 필요는 없습니다. 기본 설정으로 진행하고 기능에 필요한 안내만 선택합니다.
 
-| 지금 하려는 일                    | 참고할 안내                                           |
-| --------------------------------- | ----------------------------------------------------- |
-| 요구사항 분석·단계별 구현 요청    | [Codex 사용법](CODEX_GUIDE.md)                        |
-| 여러 단계 작업의 계획 기록        | [계획 작성 양식](../plans/README.md)                  |
-| 이름·제작자 등 내 프로젝트 설정   | [맞춤 설정](CUSTOMIZE_PROJECT.md)                     |
-| 회원가입·로그인 방식 선택         | [인증](AUTHENTICATION.md). 기본 인증 기능은 미구현    |
-| 화면 흐름·모바일·접근성·KRDS 참고 | [UI/UX](UI_UX.md)                                     |
-| 한글 폰트·외부 다운로드 방식 선택 | [폰트](FONTS.md). 기본 설정 유지 가능                 |
-| 입력 폼·서버 검증                 | [유효성 검사](VALIDATION.md)                          |
-| 비밀값·권한·공개 범위 검토        | [보안](SECURITY.md). 관련 기능 개발·외부 공개 전 확인 |
-| 페이지·서버 오류 분석             | [오류 확인과 전달](TROUBLESHOOTING.md)                |
+| 지금 하려는 일                    | 참고할 안내                                             |
+| --------------------------------- | ------------------------------------------------------- |
+| 요구사항 분석·단계별 구현 요청    | [Codex 사용법](CODEX_GUIDE.md)                          |
+| 여러 단계 작업의 계획 기록        | [계획 작성 양식](../plans/README.md)                    |
+| 이름·제작자 등 내 프로젝트 설정   | [맞춤 설정](CUSTOMIZE_PROJECT.md)                       |
+| 회원가입·로그인 설정              | [인증](AUTHENTICATION.md). Supabase Auth 연결·설정 안내 |
+| 화면 흐름·모바일·접근성·KRDS 참고 | [UI/UX](UI_UX.md)                                       |
+| 한글 폰트·외부 다운로드 방식 선택 | [폰트](FONTS.md). 기본 설정 유지 가능                   |
+| 입력 폼·서버 검증                 | [유효성 검사](VALIDATION.md)                            |
+| 비밀값·권한·공개 범위 검토        | [보안](SECURITY.md). 관련 기능 개발·외부 공개 전 확인   |
+| 페이지·서버 오류 분석             | [오류 확인과 전달](TROUBLESHOOTING.md)                  |
 
 요구사항 분석·계획 → DB 분석·필요 시 수정 → 서버 처리 → 화면 구현 → 연결 검증 순으로 필요한 단계를 진행합니다. 채팅에 분석·계획과 변경안을 먼저 제시하고 승인된 범위에서 적용합니다. 이미 승인한 같은 범위를 단계마다 반복 승인할 필요는 없습니다. 계획 파일은 필요할 때 작성 여부를 정하며, DB 변경·배포·Git 작업은 각각 승인 범위를 확인합니다.
 

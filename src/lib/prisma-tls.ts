@@ -1,5 +1,4 @@
 import { normalizeDatabaseUrl } from './database-tls';
-import { relayThroughVerifiedTls } from './prisma-tls-relay';
 import { getSupabaseCaPath, readSupabaseCa } from './supabase-ca';
 
 export function getPrismaDatasourceUrl(
@@ -22,16 +21,4 @@ export function getPrismaDatasourceUrl(
   url.searchParams.set('sslaccept', 'strict');
   url.searchParams.set('sslcert', getSupabaseCaPath().replaceAll('\\', '/'));
   return url.toString();
-}
-
-// Prisma CLI only (prisma.config.ts). On macOS the CLI connects through the
-// verified local relay in prisma-tls-relay.ts.
-export function getPrismaCliUrl(
-  connectionString: string | undefined,
-  variable: 'DIRECT_URL' | 'SHADOW_DATABASE_URL' = 'DIRECT_URL',
-): string {
-  const url = getPrismaDatasourceUrl(connectionString, variable);
-  return url && process.platform === 'darwin'
-    ? relayThroughVerifiedTls(url)
-    : url;
 }
