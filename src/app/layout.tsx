@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '바이브 코딩 시작 안내',
-  description:
-    '요구사항 분석부터 DB·서버·화면 구현과 검증까지, 비개발자를 위한 개발 순서 안내',
+  title: 'Experience Journal - 로그인',
+  description: '경험 기록 웹 애플리케이션 로그인 및 회원가입',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
