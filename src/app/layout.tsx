@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '바이브 코딩 시작 안내',
+  title: 'MOA — 경험이 모여, 나를 만들다',
   description:
-    '요구사항 분석부터 DB·서버·화면 구현과 검증까지, 비개발자를 위한 개발 순서 안내',
+    '대학 생활의 활동과 경험을 STAR로 기록하고 회고하는 나만의 성장 아카이브',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

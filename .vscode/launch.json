@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MOA 웹앱 실행 및 디버깅",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+      "args": ["dev", "--hostname", "localhost"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "pattern": "Local:.+(https?://[^\\s]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "windows": {
+        "runtimeExecutable": "${env:USERPROFILE}/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe"
+      }
+    }
+  ]
+}
