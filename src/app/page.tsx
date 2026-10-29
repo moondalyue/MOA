@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 const steps = [
   {
     id: 'requirements',
@@ -77,6 +79,26 @@ const guides = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      {/* 상단 MOA 서비스 네비게이션 메뉴 */}
+      <nav className="sticky top-0 z-30 border-b border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div className="flex items-center space-x-2 font-bold text-zinc-900 dark:text-white">
+            <span className="rounded-lg bg-blue-600 px-2.5 py-1 text-sm text-white">
+              MOA
+            </span>
+            <span>대학생 AI 경험 관리</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/experience"
+              className="inline-flex items-center rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              경험 관리 메뉴 바로가기 →
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-20">
         <header className="mb-10 sm:mb-14">
           <p className="mb-5 text-sm font-semibold tracking-wide text-indigo-600 dark:text-indigo-400">
