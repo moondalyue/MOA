@@ -1,8 +1,8 @@
-﻿# 설치와 환경 설정
+# 설치와 환경 설정
 
 새 프로젝트를 시작하기 위한 최소 보일러플레이트입니다. Next.js App Router, TypeScript, Tailwind CSS, Zod, React Hook Form, `@hookform/resolvers`, Prisma 7, ESLint, Prettier와 VS Code 설정을 포함합니다. Supabase는 PostgreSQL 데이터베이스로 사용합니다.
 
-CRUD·로그인 화면은 없으며 기본 `User` 모델만 포함합니다. Zod는 환경 변수 검증에 사용하며 React Hook Form과 resolvers는 필요한 폼을 만들 때 사용할 수 있도록 설치 구성에만 포함합니다. create-next-app 16.4.3의 TypeScript·Tailwind·ESLint·App Router 생성 결과를 기본으로 사용하고, Supabase 연결과 개발 편의를 위한 설정을 추가했습니다.
+MOA에는 Supabase Auth 기반 이메일·비밀번호 가입·로그인·계정 복구 화면을 제공합니다. 가입 시 이메일 소유 확인은 생략합니다. CRUD 화면은 없으며 앱용 기본 `User` 모델은 인증 계정과 별개입니다. Zod와 React Hook Form은 인증 입력 검사에도 사용합니다. 실제 설정·검증 상태와 준비 방법은 [인증 안내](AUTHENTICATION.md#moa-운영-설정)를 확인하세요. create-next-app 16.4.3의 TypeScript·Tailwind·ESLint·App Router 생성 결과를 기본으로 사용하고, Supabase 연결과 개발 편의를 위한 설정을 추가했습니다.
 
 처음에는 **프로젝트 가져오기 → 화면 실행**까지만 진행하세요. DB·인증·폰트 선택은 필요한 기능을 만들 때 검토합니다. 실행 중 오류가 나면 [오류 확인 안내](TROUBLESHOOTING.md)를 참고하세요.
 

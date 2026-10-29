@@ -1,4 +1,4 @@
-﻿# Vercel 배포하기
+# Vercel 배포하기
 
 로컬에서 확인한 Next.js 앱을 인터넷에 공개하는 안내입니다. 이 문서는 Vercel 프로젝트 연결, 배포 환경 변수, 인증서 포함, 운영 마이그레이션 순서와 배포 후 검증을 다룹니다.
 
@@ -45,7 +45,9 @@ GitHub Actions는 필요할 때만 [선택 안내서](GITHUB_ACTIONS.md)를 따�
 
 Vercel의 Production은 배포 환경 이름입니다. 개발 DB를 사용하는 테스트 배포도 가능하므로, 배포 환경과 DB 용도를 각각 확인하세요. 실제 서비스에는 운영용 DB와 권한을 별도로 준비합니다.
 
-Supabase Auth를 추가한 프로젝트는 구현에서 사용하는 공개 URL·공개 키도 등록하세요. `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`는 해당 변수를 사용하는 구현의 예시이며, 기본 보일러플레이트의 필수 설정은 아닙니다. 관리자 키는 일반 앱 실행을 위해 등록하지 않습니다.
+MOA 인증 기능은 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SITE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`를 사용합니다. `SITE_URL`은 해당 환경의 실제 Vercel HTTPS 주소로 지정하며, 인증 메일이 운영·Preview·로컬의 다른 환경으로 연결되지 않게 합니다. 공개 키에 관리자 키를 넣지 않습니다. SMTP 비밀번호와 Turnstile Secret key는 Supabase 설정에서 관리합니다.
+
+Supabase의 이메일 제공자는 켜고 Confirm Email은 끕니다. 가입·로그인에는 SMTP가 필요하지 않습니다. 비밀번호 복구 기능을 제공하려면 Site URL·허용 Redirect URLs·복구 메일 템플릿과 SMTP를 설정해야 하며, 공개 환경의 CAPTCHA도 준비해야 합니다. 상세 절차는 [MOA 운영 설정](AUTHENTICATION.md#moa-운영-설정)을 확인하세요. Preview에는 별도 테스트 Supabase 프로젝트와 정확히 허용한 Preview 주소를 사용합니다. GitHub Pages에서는 이 서버 인증 구현을 실행하지 않습니다. 이번 인증은 앱용 Prisma 테이블을 사용하지 않으므로 Auth만 사용한다면 DB 연결 주소를 실행 환경에 추가할 필요가 없습니다.
 
 연결 주소의 선택·비밀번호 URL 인코딩 방법은 [Supabase 연결 주소 안내](SUPABASE_SETUP.md#4-두-가지-db-연결-주소-확인)를 참고하세요. 환경별로 어떤 DB에 연결되는지 확인하고, DB 비밀번호·연결 주소에 NEXT*PUBLIC*를 붙이지 마세요. 함수 리전은 DB와 가까운 곳으로 검토합니다.
 
