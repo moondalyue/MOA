@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '나의 활동 기록',
-  description: '교내·교회 활동과 봉사활동을 기록하고 나의 성장을 확인하세요.',
+  title: 'moa',
+  description: '교내·교외 활동과 봉사활동을 기록하고 나의 성장을 확인하세요.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

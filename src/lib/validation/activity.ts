@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const categoryLabels = {
   SCHOOL: '교내 활동',
-  CHURCH: '교회 활동',
+  CHURCH: '교외 활동',
   VOLUNTEER: '봉사활동',
 } as const;
 const requiredText = z.string().trim().min(1, '내용을 입력해 주세요.');

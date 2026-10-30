@@ -9,7 +9,14 @@ export function calendarYearQuery(
 ) {
   const { start, end } = getYearBounds(year);
   return db.activity.findMany({
-    where: { userId, startDate: { gte: start, lt: end } },
+    where: {
+      userId,
+      startDate: { lt: end },
+      OR: [
+        { endDate: { gte: start } },
+        { endDate: null, startDate: { gte: start } },
+      ],
+    },
     orderBy: [{ startDate: 'asc' }, { id: 'asc' }],
     select: {
       id: true,

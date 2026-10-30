@@ -1,7 +1,55 @@
 @import 'tailwindcss';
 
+.moa-page-loading {
+  display: flex;
+  min-height: 60dvh;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.moa-loading-media {
+  width: min(100%, 40rem);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: #dcebdc;
+}
+
+.moa-loading-video,
+.moa-loading-still {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+.moa-loading-still {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moa-loading-video {
+    display: none;
+  }
+
+  .moa-loading-still {
+    display: block;
+  }
+}
+
 :root {
-  --background: #ffffff;
+  --background: #f4f0ff;
+  --page-gradient:
+    radial-gradient(ellipse at 12% 12%, #e7dcff 0%, transparent 50%),
+    radial-gradient(ellipse at 92% 70%, #eee7ff 0%, transparent 55%),
+    linear-gradient(135deg, #f6f2ff 0%, #eee8ff 50%, #faf9ff 100%);
   --foreground: #171717;
 }
 
@@ -14,13 +62,97 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #171221;
+    --page-gradient:
+      radial-gradient(ellipse at 12% 12%, #39235299 0%, transparent 50%),
+      radial-gradient(ellipse at 92% 70%, #2e204b80 0%, transparent 55%),
+      linear-gradient(135deg, #1c1528 0%, #171221 50%, #21182f 100%);
     --foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
+  min-height: 100dvh;
+  background-color: var(--background);
+  background-image: var(--page-gradient);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Keep native date controls within their allocated form column on WebKit. */
+input.activity-date-input {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+input.activity-date-input::-webkit-date-and-time-value {
+  min-height: 1.5em;
+  margin: 0;
+  text-align: start;
+}
+
+input.activity-date-input::-webkit-datetime-edit {
+  display: block;
+  min-width: 0;
+  padding: 0;
+}
+
+.navigation-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.125rem;
+  border: 1px solid #e3d6ff;
+  border-radius: 9999px;
+  background: #f3edff;
+  color: #6d28d9;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+.navigation-pill:hover:not(:disabled) {
+  border-color: #c4a7ff;
+  background: #e7dbff;
+}
+.navigation-pill:active:not(:disabled) {
+  background: #dac7ff;
+}
+.navigation-pill:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 3px;
+}
+.navigation-pill:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+@media (prefers-color-scheme: dark) {
+  .navigation-pill {
+    border-color: #614282;
+    background: #352348;
+    color: #e9ddff;
+  }
+  .navigation-pill:hover:not(:disabled) {
+    border-color: #a78bfa;
+    background: #4a3264;
+  }
+  .navigation-pill:active:not(:disabled) {
+    background: #5b4078;
+  }
 }

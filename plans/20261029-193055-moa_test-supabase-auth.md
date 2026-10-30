@@ -128,7 +128,7 @@ Supabase Auth로 이메일·비밀번호 가입, 로그인·로그아웃, 세션
 ### FullCalendar 활동 달력 (2026-10-29 21:00 KST)
 
 - 승인 근거: 사용자가 FullCalendar 표시와 기존 Next.js 서버의 데이터·권한·연도별 조회 구성을 “적용하라”, “계속 진행하라”로 요청했다. 기존 계획과 인증·포트폴리오 범위의 사전 코드 제시 생략 승인을 재사용했다.
-- 목표·방향: 최근 활동 5개를 월간 달력으로 대체한다. 한국 시간의 현재 월에서 시작하고 연간 자료를 조회하며 12월에는 다음 연도, 1월에는 이전 연도를 미리 조회한다. 표시 월은 자동 전환하지 않는다. 활동 시작일에 학교·교회·봉사 아이콘을 표시하고 날짜별 상세·수정 링크를 연결한다.
+- 목표·방향: 최근 활동 5개를 월간 달력으로 대체한다. 한국 시간의 현재 월에서 시작하고 연간 자료를 조회하며 12월에는 다음 연도, 1월에는 이전 연도를 미리 조회한다. 표시 월은 자동 전환하지 않는다. 활동 시작일에 학교·교외·봉사 아이콘을 표시하고 날짜별 상세·수정 링크를 연결한다.
 - 구조·작업 순서: 기존 Activity 모델로 충분하여 DB 변경을 생략했다. 인증 회원 ID와 시작일의 연도 범위를 제한하는 공통 서버 조회 → 입력 검증·인증을 수행하는 Server Action → 화면별 연도 캐시 → 달력·날짜별 상세 → 저장·삭제 후 갱신 → 검사 순으로 구현했다.
 - 수정 파일: src/lib/dashboard.ts(전체 통계와 해당 연도 자료), src/app/dashboard/page.tsx(달력 연결), src/app/portfolio/actions.ts(대시보드 갱신), tests/dashboard.test.ts(연간 조회로 회귀 검사 변경), package.json·package-lock.json(필요 의존성), docs/AUTHENTICATION.md(현재 동작과 검사 안내), 이 계획 파일.
 - 생성 파일: src/lib/calendar.ts(한국 날짜·연도 경계·화면별 캐시·DTO), src/lib/calendar-data.ts(서버 공통 연간 조회), src/app/dashboard/calendar-actions.ts(인증·입력 검증), activity-calendar.tsx(연도 조회와 날짜 상세), calendar-grid.tsx(FullCalendar 표시와 조작), calendar.css(반응형·선택·다크 스타일), tests/calendar.test.ts·calendar-server.test.ts(경계·캐시·권한 검사). 화면 파일은 src/app/dashboard/ 하위이다.

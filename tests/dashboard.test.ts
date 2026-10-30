@@ -44,7 +44,11 @@ test('대시보드는 전체 통계와 본인 연간 활동·빈 상태를 처�
   type Filter = {
     userId: string;
     category?: string;
-    startDate?: { gte: Date; lt: Date };
+    startDate?: { lt: Date };
+    OR?: [
+      { endDate: { gte: Date } },
+      { endDate: null; startDate: { gte: Date } },
+    ];
   };
   const filtered = (where: Filter) => {
     dbCalls++;
@@ -101,11 +105,17 @@ test('대시보드는 전체 통계와 본인 연간 활동·빈 상태를 처�
             orderBy: Array<Record<string, string>>;
           }) => {
             assert.deepEqual(orderBy, [{ startDate: 'asc' }, { id: 'asc' }]);
-            assert.equal(where.startDate?.gte.getUTCMonth(), 0);
-            assert.equal(where.startDate?.gte.getUTCDate(), 1);
+            const start = where.OR?.[0].endDate.gte;
+            assert.ok(start);
+            assert.deepEqual(where.OR, [
+              { endDate: { gte: start } },
+              { endDate: null, startDate: { gte: start } },
+            ]);
+            assert.equal(start.getUTCMonth(), 0);
+            assert.equal(start.getUTCDate(), 1);
             assert.equal(
               where.startDate?.lt.getUTCFullYear(),
-              (where.startDate?.gte.getUTCFullYear() ?? 0) + 1,
+              start.getUTCFullYear() + 1,
             );
             return Promise.resolve(
               filtered(where).map((row) => ({
@@ -113,7 +123,7 @@ test('대시보드는 전체 통계와 본인 연간 활동·빈 상태를 처�
                 category: row.category,
                 title: '활동',
                 organization: '기관',
-                startDate: where.startDate!.gte,
+                startDate: start,
                 endDate: null,
               })),
             );

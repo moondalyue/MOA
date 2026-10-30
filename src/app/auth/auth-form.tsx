@@ -23,10 +23,7 @@ export function LogoutButton() {
   const [result, action, pending] = useActionState(logout, {} as ActionResult);
   return (
     <form action={action}>
-      <button
-        disabled={pending}
-        className="min-h-11 rounded-lg px-4 text-sm font-medium hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50 dark:hover:bg-zinc-800"
-      >
+      <button disabled={pending} className="navigation-pill">
         {pending ? '로그아웃 중…' : '로그아웃'}
       </button>
       {result.error && (

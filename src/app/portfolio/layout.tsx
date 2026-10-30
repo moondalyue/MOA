@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getCurrentAuthUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getSupabaseConfig } from '@/lib/supabase/config';
+import PageLoading from '../components/page-loading';
 
 async function MemberArea({ children }: { children: ReactNode }) {
   if (!getSupabaseConfig())
@@ -26,13 +27,7 @@ async function MemberArea({ children }: { children: ReactNode }) {
 
 export default function PortfolioLayout({ children }: { children: ReactNode }) {
   return (
-    <Suspense
-      fallback={
-        <p role="status" className="p-8">
-          로그인 상태를 확인하고 있습니다…
-        </p>
-      }
-    >
+    <Suspense fallback={<PageLoading />}>
       <MemberArea>{children}</MemberArea>
     </Suspense>
   );

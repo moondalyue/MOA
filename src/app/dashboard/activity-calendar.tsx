@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
+  activityColors,
   activityIcons as icons,
   CalendarYearCache,
   getMonthYears,
@@ -87,12 +88,23 @@ export default function ActivityCalendar({
     [requestYear],
   );
   const selectDate = useCallback((value: string) => setSelectedDate(value), []);
-  const activities = useMemo(() => Object.values(years).flat(), [years]);
+  const activities = useMemo(
+    () => [
+      ...new Map(
+        Object.values(years)
+          .flat()
+          .map((activity) => [activity.id, activity]),
+      ).values(),
+    ],
+    [years],
+  );
   const selectedYear = Number(selectedDate.slice(0, 4));
   const selectedActivities = useMemo(
     () =>
       (years[selectedYear] ?? []).filter(
-        (activity) => activity.startDate === selectedDate,
+        (activity) =>
+          activity.startDate <= selectedDate &&
+          (activity.endDate ?? activity.startDate) >= selectedDate,
       ),
     [years, selectedYear, selectedDate],
   );
@@ -115,14 +127,25 @@ export default function ActivityCalendar({
         </Link>
       </div>
       <p className="mt-2 text-sm leading-7 text-zinc-600 dark:text-zinc-400">
-        활동 시작일에 표시합니다. 날짜나 아이콘을 선택해 활동을 확인하세요.
+        활동 시작일부터 종료일까지 연결해 표시합니다. 종료일이 없는 활동은
+        시작일에 표시합니다. 날짜나 아이콘을 선택해 활동을 확인하세요.
       </p>
       <ul
         aria-label="활동 유형 범례"
         className="mt-3 flex flex-wrap gap-4 text-sm"
       >
         {Object.entries(categoryLabels).map(([key, label]) => (
-          <li key={key}>
+          <li key={key} className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="inline-block h-3 w-3 rounded-sm border"
+              style={{
+                backgroundColor:
+                  activityColors[key as keyof typeof activityColors].background,
+                borderColor:
+                  activityColors[key as keyof typeof activityColors].text,
+              }}
+            />
             <span aria-hidden="true">{icons[key as keyof typeof icons]}</span>{' '}
             {label}
           </li>
@@ -216,7 +239,7 @@ export default function ActivityCalendar({
         ) : (
           <div className="py-6">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              이 날짜에 시작하는 활동이 없습니다.
+              이 날짜에 해당하는 활동이 없습니다.
             </p>
             <Link
               href="/portfolio/new"

@@ -8,7 +8,7 @@
 }
 
 .activity-calendar .calendar-day {
-  height: 7rem;
+  height: 9rem;
   vertical-align: top;
 }
 .activity-calendar .calendar-day-selected {
@@ -23,9 +23,6 @@
 @media (max-width: 639px) {
   .activity-calendar {
     font-size: 0.8rem;
-  }
-  .activity-calendar .calendar-day {
-    height: 6rem;
   }
 }
 
@@ -46,5 +43,71 @@
   }
   .activity-calendar .calendar-day-selected {
     background-color: #312e8155;
+  }
+}
+
+.activity-calendar .calendar-day-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.75rem;
+  padding: 0;
+}
+.activity-calendar .calendar-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 2.75rem;
+  margin-inline-end: auto;
+  cursor: pointer;
+}
+
+.calendar-grid-boundary {
+  position: relative;
+  min-width: 0;
+}
+.activity-calendar .calendar-more-link {
+  display: block;
+  max-width: 100%;
+  padding: 0.125rem;
+  color: #6d28d9;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.calendar-more-popover {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #ddd6fe;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #ffffff;
+  color: #272033;
+  box-shadow: 0 12px 32px #4c1d9526;
+  --fc-monarch-background: #ffffff;
+  --fc-monarch-foreground: #272033;
+}
+.calendar-more-popover :focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+.calendar-more-popover .calendar-day {
+  height: auto;
+}
+@media (prefers-color-scheme: dark) {
+  .activity-calendar .calendar-more-link {
+    color: #c4b5fd;
+  }
+  .calendar-more-popover {
+    border-color: #5b4080;
+    background: #21182f;
+    color: #f4f0ff;
+    --fc-monarch-background: #21182f;
+    --fc-monarch-foreground: #f4f0ff;
   }
 }

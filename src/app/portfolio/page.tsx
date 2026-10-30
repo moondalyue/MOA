@@ -6,10 +6,11 @@ import { requireMember } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { categoryLabels } from '@/lib/validation/activity';
 import { DeleteActivityForm } from './activity-form';
+import PageLoading from '../components/page-loading';
 
 export const metadata: Metadata = {
-  title: '포트폴리오 | 나의 활동 기록',
-  description: '내 교내·교회 활동과 봉사활동 기록',
+  title: '포트폴리오 | moa',
+  description: '내 교내·교외 활동과 봉사활동 기록',
 };
 
 async function ActivityList({
@@ -68,7 +69,7 @@ async function ActivityList({
           </p>
           <h1 className="mt-3 text-3xl font-semibold">포트폴리오</h1>
           <p className="mt-3 leading-7 text-zinc-600 dark:text-zinc-400">
-            내 교내·교회 활동과 봉사활동의 경험을 정리해 보세요.
+            내 교내·교외 활동과 봉사활동의 경험을 정리해 보세요.
           </p>
         </div>
         <Link
@@ -185,9 +186,9 @@ export default function PortfolioPage(props: {
   searchParams: Promise<{ cursor?: string }>;
 }) {
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main className="min-h-screen text-zinc-900 dark:text-zinc-100">
       <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8">
-        <Suspense fallback={<p role="status">활동을 불러오고 있습니다…</p>}>
+        <Suspense fallback={<PageLoading />}>
           <ActivityList {...props} />
         </Suspense>
       </div>

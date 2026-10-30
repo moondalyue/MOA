@@ -14,7 +14,7 @@ import {
 import { deleteActivity, saveActivity } from './actions';
 
 const controlClass =
-  'mt-2 block min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-zinc-700 dark:bg-zinc-950';
+  'mt-2 block box-border min-h-11 w-full min-w-0 max-w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-zinc-700 dark:bg-zinc-950';
 
 export function DeleteActivityForm({ id }: { id: string }) {
   const [result, action, pending] = useActionState(
@@ -107,11 +107,14 @@ export default function ActivityForm({
       required: !options.optional,
       'aria-invalid': Boolean(error),
       'aria-describedby': error ? `${name}-error` : undefined,
-      className: controlClass,
+      className:
+        options.type === 'date'
+          ? `${controlClass} activity-date-input`
+          : controlClass,
       maxLength: options.maxLength ?? 2000,
     };
     return (
-      <div>
+      <div className="w-full min-w-0 max-w-full">
         <label htmlFor={name} className="text-sm font-medium">
           {label} {options.optional ? '(선택)' : '(필수)'}
         </label>
@@ -150,7 +153,10 @@ export default function ActivityForm({
       })}
       className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 sm:p-8 dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <fieldset disabled={pending} className="space-y-6 disabled:opacity-60">
+      <fieldset
+        disabled={pending}
+        className="min-w-0 space-y-6 disabled:opacity-60"
+      >
         <legend className="sr-only">활동 정보</legend>
         <div>
           <label htmlFor="category" className="text-sm font-medium">
@@ -170,9 +176,9 @@ export default function ActivityForm({
         </div>
         {field('title', '활동명', { maxLength: 100 })}
         {field('organization', '소속·주관 기관', { maxLength: 100 })}
-        <fieldset className="space-y-4">
+        <fieldset className="w-full min-w-0 max-w-full space-y-4">
           <legend className="mb-3 font-semibold">활동 기간</legend>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
             {field('startDate', '시작일', { type: 'date' })}
             {!ongoing && field('endDate', '종료일', { type: 'date' })}
           </div>
@@ -211,7 +217,7 @@ export default function ActivityForm({
           </select>
           <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
             공개 공유 화면은 아직 제공하지 않습니다. 현재 목록은 본인만 볼 수
-            있습니다. 교회 활동 공개 여부는 신중히 선택해 주세요.
+            있습니다. 교외 활동 공개 여부는 신중히 선택해 주세요.
           </p>
         </div>
         <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">

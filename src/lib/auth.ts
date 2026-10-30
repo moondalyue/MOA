@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import type { User as AuthUser } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
@@ -8,7 +10,7 @@ import { getDb } from './db';
 import { getSupabaseConfig } from './supabase/config';
 import { createSupabaseServerClient } from './supabase/server';
 
-export async function getCurrentAuthUser() {
+export const getCurrentAuthUser = cache(async () => {
   // 인증 SDK의 시각·세션 처리는 사전 렌더링이 아닌 요청 시점에 실행한다.
   await connection();
   if (!getSupabaseConfig()) return null;
@@ -29,7 +31,7 @@ export async function getCurrentAuthUser() {
   }
   // 로그인은 검증된 Auth 사용자 ID로 판단한다. 이메일 소유 확인과는 구분한다.
   return data.user;
-}
+});
 
 export async function ensureUserProfile(user: AuthUser) {
   if (!user.email) throw new Error('이메일 정보가 필요합니다.');
@@ -53,12 +55,12 @@ export async function ensureUserProfile(user: AuthUser) {
   });
 }
 
-async function findMember(authUserId: string) {
+const findMember = cache(async (authUserId: string) => {
   return getDb().user.findUnique({
     where: { authUserId },
     select: { id: true, nickname: true },
   });
-}
+});
 
 export async function getCurrentMember() {
   const authUser = await getCurrentAuthUser();

@@ -2,6 +2,11 @@ import { z } from 'zod';
 import type { ActivityInput } from './validation/activity';
 
 export const calendarYearSchema = z.number().int().min(1).max(9998);
+export const activityColors = {
+  SCHOOL: { background: '#ddd6fe', text: '#4c1d95' },
+  CHURCH: { background: '#fbcfe8', text: '#831843' },
+  VOLUNTEER: { background: '#ccfbf1', text: '#115e59' },
+} as const;
 export const activityIcons = {
   SCHOOL: '🏫',
   CHURCH: '⛪',
@@ -18,6 +23,17 @@ export type CalendarActivity = {
 export type CalendarYearResult =
   | { ok: true; year: number; activities: CalendarActivity[] }
   | { ok: false; error: string; unauthenticated?: boolean };
+
+// FullCalendar의 종료일은 미포함이므로 표시할 마지막 날짜의 다음 날을 전달한다.
+export function getCalendarEventEnd(
+  activity: Pick<CalendarActivity, 'startDate' | 'endDate'>,
+) {
+  const date = new Date(
+    `${activity.endDate ?? activity.startDate}T00:00:00.000Z`,
+  );
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
 
 export function getKoreaToday(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {

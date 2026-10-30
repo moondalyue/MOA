@@ -1,9 +1,11 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { getDashboardData } from '@/lib/dashboard';
+import { categoryLabels } from '@/lib/validation/activity';
 import ActivityCalendar from './activity-calendar';
+import PageLoading from '../components/page-loading';
 
-export const metadata = { title: '대시보드 | 나의 활동 기록' };
+export const metadata = { title: '대시보드 | moa' };
 
 async function DashboardContent() {
   const {
@@ -18,9 +20,9 @@ async function DashboardContent() {
   } = await getDashboardData();
   const summaries = [
     { label: '전체 활동', value: total, unit: '건' },
-    { label: '교내 활동', value: counts.SCHOOL, unit: '건' },
-    { label: '교회 활동', value: counts.CHURCH, unit: '건' },
-    { label: '봉사활동', value: counts.VOLUNTEER, unit: '건' },
+    { label: categoryLabels.SCHOOL, value: counts.SCHOOL, unit: '건' },
+    { label: categoryLabels.CHURCH, value: counts.CHURCH, unit: '건' },
+    { label: categoryLabels.VOLUNTEER, value: counts.VOLUNTEER, unit: '건' },
     { label: '누적 봉사 시간', value: volunteerHours, unit: '시간' },
   ];
   return (
@@ -85,14 +87,8 @@ async function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-      <Suspense
-        fallback={
-          <p role="status" className="mx-auto max-w-5xl px-5 py-12 sm:px-8">
-            내 활동을 불러오고 있습니다…
-          </p>
-        }
-      >
+    <main className="min-h-screen text-zinc-900 dark:text-zinc-100">
+      <Suspense fallback={<PageLoading />}>
         <DashboardContent />
       </Suspense>
     </main>

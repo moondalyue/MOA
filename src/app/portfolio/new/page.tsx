@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { requireMember } from '@/lib/auth';
 import ActivityForm from '../activity-form';
 
-export const metadata = { title: '활동 등록 | 나의 활동 기록' };
+export const metadata = { title: '활동 등록 | moa' };
 
 async function NewActivity() {
   await requireMember();
@@ -19,7 +19,7 @@ async function NewActivity() {
 
 export default function NewActivityPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main className="min-h-screen text-zinc-900 dark:text-zinc-100">
       <Suspense
         fallback={
           <p role="status" className="p-8">

@@ -5,11 +5,11 @@ import { getSupabaseConfig } from '@/lib/supabase/config';
 import { authModes, type AuthMode } from '@/lib/validation/auth';
 import AuthForm from '../auth-form';
 
-export const metadata = { title: '계정 | 나의 활동 기록' };
+export const metadata = { title: '계정 | moa' };
 
 const titles: Record<AuthMode, string> = {
   login: '다시 만나 반갑습니다',
-  signup: '나의 활동 기록 시작하기',
+  signup: 'moa 시작하기',
   'forgot-password': '비밀번호를 잊으셨나요?',
   'update-password': '새 비밀번호 설정',
 };
@@ -64,7 +64,7 @@ async function AuthContent({ params, searchParams }: Props) {
 
 export default function AuthPage(props: Props) {
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main className="min-h-screen text-zinc-900 dark:text-zinc-100">
       <Suspense
         fallback={
           <p className="p-8" role="status">

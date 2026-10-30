@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import FullCalendar, {
   type CalendarRef,
   type DatesSetInfo,
@@ -14,7 +21,9 @@ import '@fullcalendar/react/skeleton.css';
 import '@fullcalendar/react/themes/monarch/theme.css';
 import '@fullcalendar/react/themes/monarch/palettes/purple.css';
 import {
+  activityColors,
   activityIcons,
+  getCalendarEventEnd,
   getKoreaToday,
   getMonthYears,
   type CalendarActivity,
@@ -22,7 +31,6 @@ import {
 import { categoryLabels } from '@/lib/validation/activity';
 import './calendar.css';
 
-const colors = { SCHOOL: '#4338ca', CHURCH: '#7e22ce', VOLUNTEER: '#047857' };
 const plugins = [themePlugin, dayGridPlugin, interactionPlugin];
 const validRange = { start: '0001-01-01', end: '9999-01-01' };
 const dateString = (date: Date) => date.toISOString().slice(0, 10);
@@ -47,6 +55,48 @@ export default function CalendarGrid({
   onDateSelect,
 }: Props) {
   const ref = useRef<CalendarRef>(null);
+  const gridBoundary = useRef<HTMLDivElement>(null);
+  const moreAnchor = useRef<HTMLElement | null>(null);
+  const popoverClass = `calendar-more-popover-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const [popoverBounds, setPopoverBounds] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
+  const updatePopoverBounds = useCallback(() => {
+    if (!gridBoundary.current || !moreAnchor.current?.isConnected) return;
+    const grid = gridBoundary.current.getBoundingClientRect();
+    const anchor = moreAnchor.current.getBoundingClientRect();
+    const topLimit = Math.max(grid.top + 8, 8);
+    const bottomLimit = Math.min(grid.bottom - 8, window.innerHeight - 8);
+    const leftLimit = Math.max(grid.left + 8, 8);
+    const rightLimit = Math.min(
+      grid.right - 8,
+      document.documentElement.clientWidth - 8,
+    );
+    const width = Math.max(0, Math.min(320, rightLimit - leftLimit));
+    const maxHeight = Math.max(0, Math.min(320, bottomLimit - topLimit));
+    setPopoverBounds({
+      top: Math.max(topLimit, Math.min(anchor.top, bottomLimit - maxHeight)),
+      left: Math.max(leftLimit, Math.min(anchor.left, rightLimit - width)),
+      width,
+      maxHeight,
+    });
+  }, []);
+  useEffect(() => {
+    const boundary = gridBoundary.current;
+    if (!boundary) return;
+    const observer = new ResizeObserver(updatePopoverBounds);
+    observer.observe(boundary);
+    window.addEventListener('resize', updatePopoverBounds);
+    window.addEventListener('scroll', updatePopoverBounds, true);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updatePopoverBounds);
+      window.removeEventListener('scroll', updatePopoverBounds, true);
+    };
+  }, [updatePopoverBounds]);
   const [today, setToday] = useState(initialToday);
   const byId = useMemo(
     () => new Map(activities.map((activity) => [activity.id, activity])),
@@ -58,10 +108,10 @@ export default function CalendarGrid({
         id: activity.id,
         title: activity.title,
         start: activity.startDate,
+        end: getCalendarEventEnd(activity),
         allDay: true,
-        backgroundColor: colors[activity.category],
-        borderColor: colors[activity.category],
-        textColor: '#ffffff',
+        color: activityColors[activity.category].background,
+        contrastColor: activityColors[activity.category].text,
       })),
     [activities],
   );
@@ -144,39 +194,70 @@ export default function CalendarGrid({
           />
         </div>
       </div>
-      <FullCalendar
-        ref={ref}
-        plugins={plugins}
-        locale={koLocale}
-        initialView="dayGridMonth"
-        initialDate={initialToday}
-        now={today}
-        timeZone="UTC"
-        headerToolbar={false}
-        height="auto"
-        fixedWeekCount={false}
-        showNonCurrentDates={false}
-        firstDay={0}
-        validRange={validRange}
-        events={events}
-        editable={false}
-        eventInteractive={true}
-        displayEventTime={false}
-        dayMaxEvents={3}
-        datesSet={datesSet}
-        navLinks={true}
-        navLinkDayClick={(date) => onDateSelect(dateString(date))}
-        dateClick={(info) => onDateSelect(info.dateStr)}
-        eventClick={(info) => {
-          info.jsEvent.preventDefault();
-          const activity = byId.get(info.event.id);
-          if (activity) onDateSelect(activity.startDate);
-        }}
-        eventContent={renderEvent}
-        dayCellClass={(info) =>
-          `calendar-day${dateString(info.date) === selectedDate ? ' calendar-day-selected' : ''}`
-        }
-      />
+      <div ref={gridBoundary} className="calendar-grid-boundary">
+        <FullCalendar
+          ref={ref}
+          plugins={plugins}
+          locale={koLocale}
+          initialView="dayGridMonth"
+          initialDate={initialToday}
+          now={today}
+          timeZone="UTC"
+          headerToolbar={false}
+          height="auto"
+          fixedWeekCount={false}
+          showNonCurrentDates={false}
+          firstDay={0}
+          validRange={validRange}
+          events={events}
+          editable={false}
+          eventInteractive={true}
+          displayEventTime={false}
+          dayMaxEvents={2}
+          moreLinkContent={(info) => `${info.num}개 더보기`}
+          moreLinkClass="calendar-more-link"
+          moreLinkClick={(info) => {
+            const target = info.jsEvent.currentTarget;
+            moreAnchor.current = target instanceof HTMLElement ? target : null;
+            updatePopoverBounds();
+            return 'popover';
+          }}
+          popoverClass={`calendar-more-popover ${popoverClass}`}
+          datesSet={datesSet}
+          dayCellTopClass="calendar-day-heading"
+          dayCellTopInnerClass="calendar-day-number"
+          navLinks={true}
+          navLinkDayClick={(date) => onDateSelect(dateString(date))}
+          dateClick={(info) => onDateSelect(info.dateStr)}
+          eventClick={(info) => {
+            info.jsEvent.preventDefault();
+            const activity = byId.get(info.event.id);
+            if (activity)
+              onDateSelect(
+                activity.startDate < `${month}-01`
+                  ? `${month}-01`
+                  : activity.startDate,
+              );
+          }}
+          eventContent={renderEvent}
+          dayCellClass={(info) =>
+            `calendar-day${dateString(info.date) === selectedDate ? ' calendar-day-selected' : ''}`
+          }
+        />
+      </div>
+      {popoverBounds && (
+        <style>{`
+          .${popoverClass} {
+            position: fixed !important;
+            top: ${popoverBounds.top}px !important;
+            left: ${popoverBounds.left}px !important;
+            width: ${popoverBounds.width}px;
+            max-width: ${popoverBounds.width}px;
+            max-height: ${popoverBounds.maxHeight}px;
+            visibility: ${popoverBounds.width && popoverBounds.maxHeight ? 'visible' : 'hidden'};
+          }
+        `}</style>
+      )}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <label htmlFor="calendar-date" className="text-sm font-medium">
           날짜 선택

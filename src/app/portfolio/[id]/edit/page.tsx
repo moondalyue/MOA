@@ -6,7 +6,7 @@ import { getDb } from '@/lib/db';
 import type { ActivityInput } from '@/lib/validation/activity';
 import ActivityForm from '../../activity-form';
 
-export const metadata = { title: '활동 수정 | 나의 활동 기록' };
+export const metadata = { title: '활동 수정 | moa' };
 
 async function EditActivity({ params }: { params: Promise<{ id: string }> }) {
   const member = await requireMember();
@@ -43,7 +43,7 @@ export default function EditActivityPage(props: {
   params: Promise<{ id: string }>;
 }) {
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main className="min-h-screen text-zinc-900 dark:text-zinc-100">
       <Suspense
         fallback={
           <p role="status" className="p-8">
